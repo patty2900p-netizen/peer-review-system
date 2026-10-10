@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PeerLoop | Peer Review System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="PeerLoop home"><span class="brand-mark">P</span> PeerLoop</a>
+    <nav>
+      <button class="nav-link active" data-view="dashboard">Dashboard</button>
+      <button class="nav-link" data-view="assignments">Assignments</button>
+      <button class="nav-link" data-view="reviews">Peer reviews</button>
+      <button class="nav-link" data-view="feedback">My feedback</button>
+    </nav>
+    <div class="profile"><span class="avatar" id="avatar">S</span><span id="userLabel">Student</span><button id="switchUser" class="small-button">Switch</button></div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">LEARN TOGETHER. IMPROVE TOGETHER.</p>
+        <h1>Good work gets better<br>with <span>good feedback.</span></h1>
+        <p class="hero-copy">Share your work, review a classmate's submission, and learn from different perspectives.</p>
+        <button class="primary" data-go="assignments">Explore assignments <span aria-hidden="true">→</span></button>
+      </div>
+      <div class="hero-art" aria-hidden="true"><div class="art-circle"></div><div class="paper paper-back"></div><div class="paper paper-front"><span class="check">✓</span><div class="fake-line long"></div><div class="fake-line"></div><div class="fake-line short"></div><div class="mini-tag">Peer feedback</div></div><div class="sparkle">✦</div></div>
+    </section>
+
+    <section id="dashboard" class="view active">
+      <div class="section-heading"><div><p class="eyebrow">YOUR OVERVIEW</p><h2>Dashboard</h2></div><span class="date-label" id="todayLabel"></span></div>
+      <div class="stats">
+        <article class="stat-card"><span class="stat-icon purple">▤</span><p>Assignments submitted</p><strong id="submittedCount">0</strong><small>Your work shared with classmates</small></article>
+        <article class="stat-card"><span class="stat-icon green">✎</span><p>Reviews completed</p><strong id="reviewsCount">0</strong><small>Helpful feedback you have given</small></article>
+        <article class="stat-card"><span class="stat-icon orange">★</span><p>Feedback received</p><strong id="feedbackCount">0</strong><small>Reviews on your submissions</small></article>
+      </div>
+      <div class="two-col">
+        <article class="panel"><div class="panel-title"><div><p class="eyebrow">NEXT STEPS</p><h3>Assignments to review</h3></div><button class="text-button" data-go="reviews">View all →</button></div><div id="dashboardReviews" class="item-list"></div></article>
+        <article class="panel"><div class="panel-title"><div><p class="eyebrow">RECENT ACTIVITY</p><h3>Your learning activity</h3></div></div><div id="activityList" class="activity-list"></div></article>
+      </div>
+    </section>
+
+    <section id="assignments" class="view">
+      <div class="section-heading"><div><p class="eyebrow">SHARE YOUR WORK</p><h2>Assignments</h2><p class="subheading">Submit your work so classmates can review it.</p></div></div>
+      <div class="two-col assignments-layout">
+        <article class="panel"><div class="panel-title"><div><p class="eyebrow">NEW SUBMISSION</p><h3>Submit an assignment</h3></div></div>
+          <form id="submissionForm">
+            <label for="assignmentTitle">Assignment title</label><input id="assignmentTitle" required maxlength="90" placeholder="e.g. Introduction to HTML">
+            <label for="assignmentSubject">Subject</label><select id="assignmentSubject"><option>Web Development</option><option>Python Programming</option><option>Communication Skills</option><option>Data Science</option><option>Other</option></select>
+            <label for="assignmentText">Your work / explanation</label><textarea id="assignmentText" required minlength="10" rows="6" placeholder="Write a short explanation or paste your assignment text here..."></textarea>
+            <p class="helper">Demo version: text submissions only. Do not enter private information.</p>
+            <button class="primary" type="submit">Submit for peer review →</button>
+          </form>
+        </article>
+        <article class="panel"><div class="panel-title"><div><p class="eyebrow">CLASS WORK</p><h3>Recent submissions</h3></div></div><div id="submissionList" class="item-list"></div></article>
+      </div>
+    </section>
+
+    <section id="reviews" class="view">
+      <div class="section-heading"><div><p class="eyebrow">HELP A CLASSMATE</p><h2>Peer reviews</h2><p class="subheading">Choose a submission and give clear, constructive feedback.</p></div></div>
+      <div class="two-col review-layout"><article class="panel"><div class="panel-title"><div><p class="eyebrow">AVAILABLE WORK</p><h3>Submissions to review</h3></div></div><div id="reviewQueue" class="item-list"></div></article>
+      <article class="panel" id="reviewPanel"><div class="panel-title"><div><p class="eyebrow">YOUR FEEDBACK</p><h3 id="reviewFormTitle">Review a submission</h3></div></div><p id="reviewPrompt" class="empty-note">Select a submission on the left to begin reviewing it.</p>
+        <form id="reviewForm" class="hidden">
+          <input type="hidden" id="reviewSubmissionId">
+          <div id="selectedWork" class="selected-work"></div>
+          <label for="rating">Overall rating</label><select id="rating" required><option value="">Choose a rating</option><option value="5">5 — Excellent</option><option value="4">4 — Very good</option><option value="3">3 — Good</option><option value="2">2 — Needs improvement</option><option value="1">1 — Needs a lot of work</option></select>
+          <label for="strengths">What was done well?</label><textarea id="strengths" required rows="3" placeholder="Mention a specific strength..."></textarea>
+          <label for="suggestion">One helpful suggestion</label><textarea id="suggestion" required rows="3" placeholder="Suggest a clear next step..."></textarea>
+          <button class="primary" type="submit">Send review →</button>
+        </form>
+      </article></div>
+    </section>
+
+    <section id="feedback" class="view">
+      <div class="section-heading"><div><p class="eyebrow">GROW FROM FEEDBACK</p><h2>My feedback</h2><p class="subheading">See the comments classmates have left on your work.</p></div></div>
+      <div id="feedbackList" class="feedback-grid"></div>
+    </section>
+
+    <footer>PeerLoop · A student-built peer learning demo <span>Give feedback kindly and make it useful.</span></footer>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="script.js"></script>
+</body>
+</html>
