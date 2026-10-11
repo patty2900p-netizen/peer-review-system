@@ -30,12 +30,12 @@ async function sessionRefresh() {
             .eq("user_id", session.user.id)
             .maybeSingle();
 
-        if (adminCheck.error) {
-            console.error("Admin check failed:", adminCheck.error);
-            isAdmin = false;
-        } else {
-            isAdmin = !!adminCheck.data;
-        }
+      if (adminCheck.error) {
+    console.error("Admin check failed:", adminCheck.error);
+    isAdmin = false;
+} else {
+    isAdmin = Boolean(adminCheck.data);
+}
 
         showApp();
         await load();
