@@ -21,8 +21,40 @@ $("subForm").addEventListener("submit",async e=>{e.preventDefault();let b=e.subm
 function row(s,button=false){return `<div class="row"><span class="letter">${esc(s.title[0].toUpperCase())}</span><div class="rowtext"><b>${esc(s.title)}</b><small>${esc(s.owner_name)} · ${esc(s.subject)} · ${new Date(s.created_at).toLocaleDateString()}</small></div>${button?`<button class="mini" data-review="${s.id}">Review</button>`:""}</div>`}
 function empty(t){return `<div class="empty">${esc(t)}</div>`}
 function renderQueue(){let q=assignments.filter(s=>s.owner_id!==session.user.id&&!reviews.some(r=>r.assignment_id===s.id&&r.reviewer_id===session.user.id));$("queue").innerHTML=q.length?q.map(s=>row(s,true)).join(""):empty("No new assignments to review right now.");$("dashQueue").innerHTML=q.slice(0,3).length?q.slice(0,3).map(s=>row(s,true)).join(""):empty("No reviews waiting. Check back later.")}
-function render(){let mine=assignments.filter(s=>s.owner_id===session.user.id),given=reviews.filter(r=>r.reviewer_id===session.user.id),received=reviews.filter(r=>mine.some(s=>s.id===r.assignment_id));$("subCount").textContent=mine.length;$("givenCount").textContent=given.length;$("receivedCount").textContent=received.length;$("recent").innerHTML=assignments.slice(0,5).map(s=>row(s)).join("")||empty("New submissions will appear here.");$("subTotal").textContent=assignments.length;$("subList").innerHTML=assignments.map(s=>`<div class="row"><span class="letter">${esc(s.title[0].toUpperCase())}</span><div class="rowtext"><b>${esc(s.title)}</b><small>${esc(s.owner_name)} · ${esc(s.subject)} · ${reviews.filter(r=>r.assignment_id===s.id).length} review(s)</small></div><span class="chip">${s.owner_id===session.user.id?"Yours":"Shared"}</span></div>`).join("")||empty("Be the first to submit an assignment.");renderQueue();$("feedbackList").innerHTML=received.map(r=>{let s=mine.find(x=>x.id===r.assignment_id);return `<article class="feedback"><div class="fbhead"><h3>${esc(s.title)}</h3><b>★ ${r.rating}/5</b></div><small>From ${esc(r.reviewer_name)} · ${new Date(r.created_at).toLocaleDateString()}</small><p><strong>What went well</strong><br>${esc(r.strengths)}</p><p><strong>Suggestion</strong><br>${esc(r.suggestion)}</p></article>`}).join("")||empty("Feedback from classmates will appear here.")}
+function render()renderAssignments();
+function renderAssignments() {
+    let search = $("searchAssignments").value.toLowerCase().trim();
+    let subject = $("filterSubject").value;
+
+    let filtered = assignments.filter(s => {
+        let matchesSearch = s.title.toLowerCase().includes(search);
+        let matchesSubject = subject === "All" || s.subject === subject;
+
+        return matchesSearch && matchesSubject;
+    });
+
+    $("subList").innerHTML = filtered.map(s => `
+        <div class="row">
+            <span class="letter">${esc(s.title[0].toUpperCase())}</span>
+
+            <div class="rowtext">
+                <b>${esc(s.title)}</b>
+                <small>
+                    ${esc(s.owner_name)} · ${esc(s.subject)}
+                    · ${reviews.filter(r => r.assignment_id === s.id).length} review(s)
+                </small>
+            </div>
+
+            <span class="chip">
+                ${s.owner_id === session.user.id ? "Yours" : "Shared"}
+            </span>
+        </div>
+    `).join("") || empty("No matching assignments found.");
+}
 function startReview(id){let s=assignments.find(x=>x.id===id);if(!s)return;if(s.owner_id===session.user.id)return toast("You can't review your own assignment.");if(reviews.some(r=>r.assignment_id===id&&r.reviewer_id===session.user.id))return toast("You've already reviewed this assignment.");$("reviewId").value=id;$("reviewTitle").textContent=s.title;$("reviewPrompt").classList.add("hide");$("reviewForm").classList.remove("hide");$("work").innerHTML=`<b>${esc(s.owner_name)} · ${esc(s.subject)}</b><p>${esc(s.body)}</p>`;$("rating").value="";$("strengths").value="";$("suggestion").value="";go("reviews")}
 document.addEventListener("click",e=>{let b=e.target.closest("[data-review]");if(b)startReview(b.dataset.review)});
 $("reviewForm").addEventListener("submit",async e=>{e.preventDefault();let id=$("reviewId").value,b=e.submitter;b.disabled=true;try{let r=await db.from("reviews").insert({assignment_id:id,reviewer_id:session.user.id,reviewer_name:name,rating:Number($("rating").value),strengths:$("strengths").value.trim(),suggestion:$("suggestion").value.trim()});if(r.error){if(r.error.code==="23505")throw Error("You already reviewed this assignment.");throw r.error}e.target.classList.add("hide");$("reviewPrompt").classList.remove("hide");$("reviewTitle").textContent="Write a review";await load();toast("Your review has been shared.")}catch(err){msg("reviewMsg",err.message,true)}finally{b.disabled=false}});
 if(db){db.auth.onAuthStateChange((_event,s)=>{session=s;if(s){name=s.user.user_metadata?.display_name||s.user.email.split("@")[0];showApp();setTimeout(load,0)}else showAuth()});sessionRefresh()}
+$("searchAssignments").addEventListener("input", renderAssignments);
+
+$("filterSubject").addEventListener("change", renderAssignments);
