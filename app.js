@@ -64,17 +64,77 @@ function empty(t){return `<div class="empty">${esc(t)}</div>`}
 function renderQueue(){let q=assignments.filter(s=>s.owner_id!==session.user.id&&!reviews.some(r=>r.assignment_id===s.id&&r.reviewer_id===session.user.id));$("queue").innerHTML=q.length?q.map(s=>row(s,true)).join(""):empty("No new assignments to review right now.");$("dashQueue").innerHTML=q.slice(0,3).length?q.slice(0,3).map(s=>row(s,true)).join(""):empty("No reviews waiting. Check back later.")}
 function render() {
     renderAssignments();
+
+function render() {
+    renderAssignments();
+    renderQueue();
+
+    // Update the existing student dashboard counters
+    let mine = assignments.filter(
+        s => s.owner_id === session.user.id
+    );
+
+    let given = reviews.filter(
+        r => r.reviewer_id === session.user.id
+    );
+
+    let received = reviews.filter(
+        r => mine.some(s => s.id === r.assignment_id)
+    );
+
+    $("subCount").textContent = mine.length;
+    $("givenCount").textContent = given.length;
+    $("receivedCount").textContent = received.length;
+
+    // Display admin information only for administrators
+    if (isAdmin) {
+        renderAdmin();
+    }
 }
-function renderAssignments() {
-    let search = $("searchAssignments").value.toLowerCase().trim();
-    let subject = $("filterSubject").value;
 
-    let filtered = assignments.filter(s => {
-        let matchesSearch = s.title.toLowerCase().includes(search);
-        let matchesSubject = subject === "All" || s.subject === subject;
+function renderAdmin() {
+    $("adminAssignments").textContent = assignments.length;
+    $("adminReviews").textContent = reviews.length;
 
-        return matchesSearch && matchesSubject;
-    });
+    $("adminAssignmentList").innerHTML =
+        assignments.map(s => `
+            <div class="row">
+                <div class="rowtext">
+                    <b>${esc(s.title)}</b>
+                    <small>
+                        ${esc(s.owner_name)} · ${esc(s.subject)}
+                    </small>
+                </div>
+            </div>
+        `).join("") || empty("No assignments submitted yet.");
+
+    $("adminReviewList").innerHTML =
+        reviews.map(r => {
+            let assignment = assignments.find(
+                s => s.id === r.assignment_id
+            );
+
+            return `
+                <div class="row">
+                    <div class="rowtext">
+                        <b>${esc(r.reviewer_name)}</b>
+                        <small>
+                            Assignment: ${esc(assignment?.title || "Unknown")}
+                        </small>
+                        <small>
+                            Rating: ${esc(r.rating)}/5
+                        </small>
+                        <small>
+                            Strengths: ${esc(r.strengths)}
+                        </small>
+                        <small>
+                            Suggestion: ${esc(r.suggestion)}
+                        </small>
+                    </div>
+                </div>
+            `;
+        }).join("") || empty("No peer reviews submitted yet.");
+}
 
     $("subList").innerHTML = filtered.map(s => `
         <div class="row">
