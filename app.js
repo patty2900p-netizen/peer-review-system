@@ -21,7 +21,9 @@ $("subForm").addEventListener("submit",async e=>{e.preventDefault();let b=e.subm
 function row(s,button=false){return `<div class="row"><span class="letter">${esc(s.title[0].toUpperCase())}</span><div class="rowtext"><b>${esc(s.title)}</b><small>${esc(s.owner_name)} · ${esc(s.subject)} · ${new Date(s.created_at).toLocaleDateString()}</small></div>${button?`<button class="mini" data-review="${s.id}">Review</button>`:""}</div>`}
 function empty(t){return `<div class="empty">${esc(t)}</div>`}
 function renderQueue(){let q=assignments.filter(s=>s.owner_id!==session.user.id&&!reviews.some(r=>r.assignment_id===s.id&&r.reviewer_id===session.user.id));$("queue").innerHTML=q.length?q.map(s=>row(s,true)).join(""):empty("No new assignments to review right now.");$("dashQueue").innerHTML=q.slice(0,3).length?q.slice(0,3).map(s=>row(s,true)).join(""):empty("No reviews waiting. Check back later.")}
-function render()renderAssignments();
+function render() {
+    renderAssignments();
+}
 function renderAssignments() {
     let search = $("searchAssignments").value.toLowerCase().trim();
     let subject = $("filterSubject").value;
