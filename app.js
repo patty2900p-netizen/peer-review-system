@@ -13,7 +13,38 @@ $("authForm").addEventListener("submit",async e=>{e.preventDefault();if(!db)retu
 $("logout").onclick=async()=>{let r=await db.auth.signOut();if(r.error)toast(r.error.message);else{session=null;showAuth()}};
 function showAuth(){$("authScreen").classList.remove("hide");$("appScreen").classList.add("hide");$("nav").classList.add("hide");$("userArea").classList.add("hide")}
 function showApp(){$("authScreen").classList.add("hide");$("appScreen").classList.remove("hide");$("nav").classList.remove("hide");$("userArea").classList.remove("hide");$("userName").textContent=name;$("avatar").textContent=name[0].toUpperCase();$("welcome").textContent="Welcome back, "+name.split(" ")[0]+"!"}
-async function sessionRefresh(){if(!db)return;let r=await db.auth.getSession();session=r.data.session;if(session){name=session.user.user_metadata?.display_name||session.user.email.split("@")[0];showApp();await load()}else showAuth()}
+
+async function sessionRefresh() {
+    if (!db) return;
+
+    let r = await db.auth.getSession();
+    session = r.data.session;
+
+    if (session) {
+        name = session.user.user_metadata?.display_name ||
+               session.user.email.split("@")[0];
+
+        let adminCheck = await db
+            .from("admin_users")
+            .select("user_id")
+            .eq("user_id", session.user.id)
+            .maybeSingle();
+
+        if (adminCheck.error) {
+            console.error("Admin check failed:", adminCheck.error);
+            isAdmin = false;
+        } else {
+            isAdmin = !!adminCheck.data;
+        }
+
+        showApp();
+        await load();
+    } else {
+        session = null;
+        isAdmin = false;
+        showAuth();
+    }
+}
 async function load(){if(!session)return;try{let [a,r]=await Promise.all([db.from("assignments").select("*").order("created_at",{ascending:false}),db.from("reviews").select("*")]);if(a.error)throw a.error;if(r.error)throw r.error;assignments=a.data||[];reviews=r.data||[];render()}catch(e){toast("Database error: "+e.message)}}
 function go(v){document.querySelectorAll(".view").forEach(x=>x.classList.toggle("active",x.id===v));document.querySelectorAll("[data-view]").forEach(x=>x.classList.toggle("active",x.dataset.view===v));window.scrollTo({top:0,behavior:"smooth"})}
 document.querySelectorAll("[data-view]").forEach(x=>x.onclick=()=>go(x.dataset.view));document.querySelectorAll("[data-go]").forEach(x=>x.onclick=()=>go(x.dataset.go));
