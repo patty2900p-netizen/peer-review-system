@@ -33,5 +33,32 @@
 
 <div id="subList" class="stack"></div></article></div></section>
 <section id="reviews" class="view"><div class="heading"><div><small class="eyebrow">LEARN BY HELPING</small><h2>Peer reviews</h2><p>Be specific, respectful, and helpful.</p></div></div><div class="grid equal"><article class="panel"><small class="eyebrow">REVIEW QUEUE</small><h3>Ready for your input</h3><div id="queue" class="stack"></div></article><article class="panel"><small class="eyebrow">YOUR RESPONSE</small><h3 id="reviewTitle">Write a review</h3><p id="reviewPrompt" class="empty">Choose an assignment to start.</p><form id="reviewForm" class="hide"><input id="reviewId" type="hidden"><div id="work" class="work"></div><div class="field"><label for="rating">Overall rating</label><select id="rating" required><option value="">Choose a rating</option><option value="5">5 — Excellent</option><option value="4">4 — Very good</option><option value="3">3 — Good</option><option value="2">2 — Needs improvement</option><option value="1">1 — Needs more work</option></select></div><div class="field"><label for="strengths">What works well?</label><textarea id="strengths" required rows="3" placeholder="Mention a specific strength..."></textarea></div><div class="field"><label for="suggestion">One suggestion</label><textarea id="suggestion" required rows="3" placeholder="Offer a realistic way to improve it..."></textarea></div><button class="primary">Submit review →</button><p id="reviewMsg" class="msg"></p></form></article></div></section>
-<section id="feedback" class="view"><div class="heading"><div><small class="eyebrow">YOUR NEXT STEP</small><h2>My feedback</h2><p>Reviews from classmates, all in one place.</p></div></div><div id="feedbackList" class="feedback-grid"></div></section></section>
+<section id="feedback" class="view"><div class="heading"><div><small class="eyebrow">YOUR NEXT STEP</small><h2>My feedback</h2><p>Reviews from classmates, all in one place.</p></div></div><div id="feedbackList" class="feedback-grid"></div></section><section id="profile" class="view">
+  <div class="heading">
+    <div>
+      <small class="eyebrow">YOUR ACCOUNT</small>
+      <h2>My Profile</h2>
+      <p>Manage your basic student information.</p>
+    </div>
+  </div>
+
+  <article class="panel">
+    <h3>Student details</h3>
+
+    <div class="field">
+      <label>Email address</label>
+      <input id="profileEmail" type="email" readonly>
+    </div>
+
+    <form id="profileForm">
+      <div class="field">
+        <label for="profileName">Display name</label>
+        <input id="profileName" type="text" required minlength="2" maxlength="40">
+      </div>
+
+      <button class="primary">Save profile</button>
+      <p id="profileMsg" class="msg"></p>
+    </form>
+  </article>
+</section></section>
 <footer>peerloop<span>.</span> · Peer review system for online learning <small>Be kind. Be specific. Keep learning.</small></footer></main><div id="toast" class="toast"></div><script src="config.js"></script><script type="module" src="app.js"></script></body></html>
