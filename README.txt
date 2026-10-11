@@ -1,40 +1,43 @@
-# PeerLoop — Peer Review System for Online Learning
+# PeerLoop — Student Peer Review System
 
-## Run the project
-1. Extract `PeerLoop_Project.zip`.
-2. Open the `peer_review_system` folder.
-3. Double-click `index.html` (Chrome or Edge recommended).
-4. Try the sample assignments and reviews. Submit a new assignment to test the form.
-5. Use the **Switch** button to change demo student and test reviewing/feedback.
+PeerLoop is a student peer-review web app. It uses Supabase Authentication and a shared PostgreSQL database so signed-in classmates can publish assignments and exchange feedback.
 
-No installation is needed.
+## Live app
+https://patty2900p-netizen.github.io/peer-review-system/
 
-## Features
-- Dashboard counts for submissions, reviews, and feedback.
-- Assignment submission (title, subject, text).
-- Peer review with 1–5 rating, strengths, and suggestions.
-- Feedback page showing reviews received.
+## Main features
+- Student account creation and login through Supabase Auth.
+- Dashboard with submission, review, and feedback counts.
+- Publish text-based assignments with a subject.
+- Browse classmates' submissions.
+- Review another student's work with a 1–5 rating, strengths, and one suggestion.
+- View feedback received on your own assignments.
 - Responsive layout for desktop and mobile.
-- Saves demo information in the current browser using localStorage.
 
 ## Files
-- `index.html`: page structure and forms.
-- `style.css`: layout, colours, spacing, and responsive design.
-- `script.js`: button actions, form validation, reviews, dashboard counts, and browser storage.
+- `index.html` — page structure and forms.
+- `style.css` — styling and responsive layout.
+- `app.js` — Supabase authentication, database operations, and page behaviour.
+- `config.js` — Supabase project URL and publishable browser key.
+- `supabase_schema.sql` — database tables, indexes, and Row Level Security policies.
 
-## Important project limitation
-This is a front-end classroom prototype. Browser `localStorage` is local to one browser/device and is not a secure account system or shared online database. The **Switch** button is only for demonstrating different students on one device. For real multi-device use, add a backend/database (for example, Firebase or a Node.js API) and proper authentication. Do not enter private information.
+## Supabase setup
+1. Create or open your Supabase project.
+2. Open **SQL Editor**.
+3. Run the complete `supabase_schema.sql` file.
+4. In **Project Settings → API**, copy the Project URL and publishable key.
+5. Put those two values in `config.js`.
+6. In **Authentication → URL Configuration**, add the deployed GitHub Pages URL to the allowed redirect URLs.
 
-## Team division (3 members)
-1. **Member 1 — HTML and pages:** explain `index.html`, forms, labels, navigation, and semantic structure.
-2. **Member 2 — CSS and UI:** explain `style.css`, colour scheme, cards, responsive media queries, and usability.
-3. **Member 3 — JavaScript and testing:** explain `script.js`, form validation, `localStorage`, review submission, and testing.
-All members should run the app and understand the overall workflow before the viva.
+## Before making the app public
+- Keep Row Level Security enabled on both tables. The SQL policies allow signed-in students to read class submissions and reviews, only create assignments as their own account, and only review another student's assignment as themselves.
+- The browser publishable key is expected to be visible. Never put a Supabase `service_role` or secret key in `config.js`.
+- For a public launch, configure a trusted SMTP email provider in Supabase before enabling email confirmation. Supabase's built-in email sender is rate-limited and is intended for testing.
+- Test account creation, email confirmation, login, logout, assignment submission, review submission, and feedback on a second browser/account.
+- Only collect information students are comfortable sharing with their class. This version accepts text submissions only.
 
-## Demo flow for presentation
-1. Open Dashboard and explain the three counts.
-2. Open Assignments and submit a title, subject, and short assignment.
-3. Click Switch to change demo student.
-4. Open Peer reviews, select the assignment, rate it, and write constructive feedback.
-5. Switch back to the assignment owner and open My feedback.
-6. Explain that the current prototype stores information in the browser only.
+## Run locally
+Use a local static web server (for example, VS Code Live Server) rather than opening the HTML file directly, because `app.js` loads Supabase as an ES module.
+
+## Important
+This is a student project prototype, not a production-grade learning management system. It does not include moderation, reporting, password reset UI, or administrator tools.
