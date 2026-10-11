@@ -2,7 +2,7 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 const $=id=>document.getElementById(id);const c=window.PEERLOOP_CONFIG||{};
 const configured=c.SUPABASE_URL?.startsWith("https://")&&!c.SUPABASE_URL.includes("PASTE_YOUR")&&c.SUPABASE_ANON_KEY&&!c.SUPABASE_ANON_KEY.includes("PASTE_YOUR");
 const db=configured?createClient(c.SUPABASE_URL,c.SUPABASE_ANON_KEY):null;
-let session=null,name="Student",assignments=[],reviews=[],mode="login";
+let session=null,name="Student",assignments=[],reviews=[],mode="login",isadmin=false;
 const esc=s=>String(s??"").replace(/[&<>"']/g,x=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[x]));
 function msg(id,t,error=false){$(id).textContent=t;$(id).classList.toggle("error",error)}
 function toast(t){$("toast").textContent=t;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),2800)}
