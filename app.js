@@ -97,6 +97,44 @@ $("subForm").addEventListener("submit",async e=>{e.preventDefault();let b=e.subm
 function row(s,button=false){return `<div class="row"><span class="letter">${esc(s.title[0].toUpperCase())}</span><div class="rowtext"><b>${esc(s.title)}</b><small>${esc(s.owner_name)} · ${esc(s.subject)} · ${new Date(s.created_at).toLocaleDateString()}</small></div>${button?`<button class="mini" data-review="${s.id}">Review</button>`:""}</div>`}
 function empty(t){return `<div class="empty">${esc(t)}</div>`}
 function renderQueue(){let q=assignments.filter(s=>s.owner_id!==session.user.id&&!reviews.some(r=>r.assignment_id===s.id&&r.reviewer_id===session.user.id));$("queue").innerHTML=q.length?q.map(s=>row(s,true)).join(""):empty("No new assignments to review right now.");$("dashQueue").innerHTML=q.slice(0,3).length?q.slice(0,3).map(s=>row(s,true)).join(""):empty("No reviews waiting. Check back later.")}
+
+function renderAdmin() {
+    const adminSection = $("admin");
+    if (!adminSection) return;
+
+    if (!isAdmin) {
+        adminSection.classList.add("hide");
+        return;
+    }
+
+    adminSection.classList.remove("hide");
+
+    $("adminAssignments").textContent = assignments.length;
+    $("adminReviews").textContent = reviews.length;
+
+    $("adminAssignmentList").innerHTML = assignments.length
+        ? assignments.map(s => `
+            <div class="row">
+                <div class="rowtext">
+                    <b>${esc(s.title)}</b>
+                    <small>${esc(s.owner_name)} · ${esc(s.subject)}</small>
+                </div>
+            </div>
+        `).join("")
+        : empty("No assignments found.");
+
+    $("adminReviewList").innerHTML = reviews.length
+        ? reviews.map(r => `
+            <div class="row">
+                <div class="rowtext">
+                    <b>${esc(r.reviewer_name)} · ${r.rating}/5</b>
+                    <small>${esc(r.strengths || "No strengths provided")}</small>
+                    <small>${esc(r.suggestion || "No suggestion provided")}</small>
+                </div>
+            </div>
+        `).join("")
+        : empty("No reviews found.");
+}
 function render() {
     renderAssignments();
     renderAdmin();
