@@ -136,10 +136,12 @@ function renderAdmin() {
         : empty("No reviews found.");
 }
 function render() {
+    console.log("PEERLOOP: render called");
+    console.log("PEERLOOP: renderAdmin type:", typeof renderAdmin);
+
     renderAssignments();
     renderAdmin();
 }
-
 function renderAssignments() {
     let search = $("searchAssignments").value.toLowerCase().trim();
     let subject = $("filterSubject").value;
