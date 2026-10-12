@@ -98,33 +98,40 @@ function row(s,button=false){return `<div class="row"><span class="letter">${esc
 function empty(t){return `<div class="empty">${esc(t)}</div>`}
 function renderQueue(){let q=assignments.filter(s=>s.owner_id!==session.user.id&&!reviews.some(r=>r.assignment_id===s.id&&r.reviewer_id===session.user.id));$("queue").innerHTML=q.length?q.map(s=>row(s,true)).join(""):empty("No new assignments to review right now.");$("dashQueue").innerHTML=q.slice(0,3).length?q.slice(0,3).map(s=>row(s,true)).join(""):empty("No reviews waiting. Check back later.")}
 function render() {
-    renderAssignments();
+    renderAdmin();
+}
 
 function render() {
     renderAssignments();
-    renderQueue();
+    renderAdmin();
+}
 
-    // Update the existing student dashboard counters
-    let mine = assignments.filter(
-        s => s.owner_id === session.user.id
-    );
+function renderAssignments() {
+    let search = $("searchAssignments").value.toLowerCase().trim();
+    let subject = $("filterSubject").value;
 
-    let given = reviews.filter(
-        r => r.reviewer_id === session.user.id
-    );
+    let filtered = assignments.filter(s => {
+        let matchesSearch = s.title.toLowerCase().includes(search);
+        let matchesSubject = subject === "All" || s.subject === subject;
 
-    let received = reviews.filter(
-        r => mine.some(s => s.id === r.assignment_id)
-    );
+        return matchesSearch && matchesSubject;
+    });
 
-    $("subCount").textContent = mine.length;
-    $("givenCount").textContent = given.length;
-    $("receivedCount").textContent = received.length;
-
-    // Display admin information only for administrators
-    if (isAdmin) {
-        renderAdmin();
-    }
+    $("subList").innerHTML = filtered.map(s => `
+        <div class="row">
+            <span class="letter">${esc(s.title[0].toUpperCase())}</span>
+            <div class="rowtext">
+                <b>${esc(s.title)}</b>
+                <small>
+                    ${esc(s.owner_name)} · ${esc(s.subject)}
+                    · ${reviews.filter(r => r.assignment_id === s.id).length} review(s)
+                </small>
+            </div>
+            <span class="chip">
+                ${s.owner_id === session.user.id ? "Yours" : "Shared"}
+            </span>
+        </div>
+    `).join("") || empty("No matching assignments found.");
 }
 
 function renderAdmin() {
@@ -136,9 +143,7 @@ function renderAdmin() {
             <div class="row">
                 <div class="rowtext">
                     <b>${esc(s.title)}</b>
-                    <small>
-                        ${esc(s.owner_name)} · ${esc(s.subject)}
-                    </small>
+                    <small>${esc(s.owner_name)} · ${esc(s.subject)}</small>
                 </div>
             </div>
         `).join("") || empty("No assignments submitted yet.");
@@ -153,42 +158,16 @@ function renderAdmin() {
                 <div class="row">
                     <div class="rowtext">
                         <b>${esc(r.reviewer_name)}</b>
-                        <small>
-                            Assignment: ${esc(assignment?.title || "Unknown")}
-                        </small>
-                        <small>
-                            Rating: ${esc(r.rating)}/5
-                        </small>
-                        <small>
-                            Strengths: ${esc(r.strengths)}
-                        </small>
-                        <small>
-                            Suggestion: ${esc(r.suggestion)}
-                        </small>
+                        <small>Assignment: ${esc(assignment?.title || "Unknown")}</small>
+                        <small>Rating: ${esc(r.rating)}/5</small>
+                        <small>Strengths: ${esc(r.strengths)}</small>
+                        <small>Suggestion: ${esc(r.suggestion)}</small>
                     </div>
                 </div>
             `;
         }).join("") || empty("No peer reviews submitted yet.");
 }
 
-    $("subList").innerHTML = filtered.map(s => `
-        <div class="row">
-            <span class="letter">${esc(s.title[0].toUpperCase())}</span>
-
-            <div class="rowtext">
-                <b>${esc(s.title)}</b>
-                <small>
-                    ${esc(s.owner_name)} · ${esc(s.subject)}
-                    · ${reviews.filter(r => r.assignment_id === s.id).length} review(s)
-                </small>
-            </div>
-
-            <span class="chip">
-                ${s.owner_id === session.user.id ? "Yours" : "Shared"}
-            </span>
-        </div>
-    `).join("") || empty("No matching assignments found.");
-}
 function startReview(id){let s=assignments.find(x=>x.id===id);if(!s)return;if(s.owner_id===session.user.id)return toast("You can't review your own assignment.");if(reviews.some(r=>r.assignment_id===id&&r.reviewer_id===session.user.id))return toast("You've already reviewed this assignment.");$("reviewId").value=id;$("reviewTitle").textContent=s.title;$("reviewPrompt").classList.add("hide");$("reviewForm").classList.remove("hide");$("work").innerHTML=`<b>${esc(s.owner_name)} · ${esc(s.subject)}</b><p>${esc(s.body)}</p>`;$("rating").value="";$("strengths").value="";$("suggestion").value="";go("reviews")}
 document.addEventListener("click",e=>{let b=e.target.closest("[data-review]");if(b)startReview(b.dataset.review)});
 $("reviewForm").addEventListener("submit",async e=>{e.preventDefault();let id=$("reviewId").value,b=e.submitter;b.disabled=true;try{let r=await db.from("reviews").insert({assignment_id:id,reviewer_id:session.user.id,reviewer_name:name,rating:Number($("rating").value),strengths:$("strengths").value.trim(),suggestion:$("suggestion").value.trim()});if(r.error){if(r.error.code==="23505")throw Error("You already reviewed this assignment.");throw r.error}e.target.classList.add("hide");$("reviewPrompt").classList.remove("hide");$("reviewTitle").textContent="Write a review";await load();toast("Your review has been shared.")}catch(err){msg("reviewMsg",err.message,true)}finally{b.disabled=false}});// Open the profile page
