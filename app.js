@@ -130,40 +130,6 @@ function renderAssignments() {
     `).join("") || empty("No matching assignments found.");
 }
 
-function renderAdmin() {
-    $("adminAssignments").textContent = assignments.length;
-    $("adminReviews").textContent = reviews.length;
-
-    $("adminAssignmentList").innerHTML =
-        assignments.map(s => `
-            <div class="row">
-                <div class="rowtext">
-                    <b>${esc(s.title)}</b>
-                    <small>${esc(s.owner_name)} · ${esc(s.subject)}</small>
-                </div>
-            </div>
-        `).join("") || empty("No assignments submitted yet.");
-
-    $("adminReviewList").innerHTML =
-        reviews.map(r => {
-            let assignment = assignments.find(
-                s => s.id === r.assignment_id
-            );
-
-            return `
-                <div class="row">
-                    <div class="rowtext">
-                        <b>${esc(r.reviewer_name)}</b>
-                        <small>Assignment: ${esc(assignment?.title || "Unknown")}</small>
-                        <small>Rating: ${esc(r.rating)}/5</small>
-                        <small>Strengths: ${esc(r.strengths)}</small>
-                        <small>Suggestion: ${esc(r.suggestion)}</small>
-                    </div>
-                </div>
-            `;
-        }).join("") || empty("No peer reviews submitted yet.");
-}
-
 function startReview(id){let s=assignments.find(x=>x.id===id);if(!s)return;if(s.owner_id===session.user.id)return toast("You can't review your own assignment.");if(reviews.some(r=>r.assignment_id===id&&r.reviewer_id===session.user.id))return toast("You've already reviewed this assignment.");$("reviewId").value=id;$("reviewTitle").textContent=s.title;$("reviewPrompt").classList.add("hide");$("reviewForm").classList.remove("hide");$("work").innerHTML=`<b>${esc(s.owner_name)} · ${esc(s.subject)}</b><p>${esc(s.body)}</p>`;$("rating").value="";$("strengths").value="";$("suggestion").value="";go("reviews")}
 document.addEventListener("click",e=>{let b=e.target.closest("[data-review]");if(b)startReview(b.dataset.review)});
 $("reviewForm").addEventListener("submit",async e=>{e.preventDefault();let id=$("reviewId").value,b=e.submitter;b.disabled=true;try{let r=await db.from("reviews").insert({assignment_id:id,reviewer_id:session.user.id,reviewer_name:name,rating:Number($("rating").value),strengths:$("strengths").value.trim(),suggestion:$("suggestion").value.trim()});if(r.error){if(r.error.code==="23505")throw Error("You already reviewed this assignment.");throw r.error}e.target.classList.add("hide");$("reviewPrompt").classList.remove("hide");$("reviewTitle").textContent="Write a review";await load();toast("Your review has been shared.")}catch(err){msg("reviewMsg",err.message,true)}finally{b.disabled=false}});// Open the profile page
