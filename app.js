@@ -55,7 +55,42 @@ async function sessionRefresh() {
         showAuth();
     }
 }
-async function load(){if(!session)return;try{let [a,r]=await Promise.all([db.from("assignments").select("*").order("created_at",{ascending:false}),db.from("reviews").select("*")]);if(a.error)throw a.error;if(r.error)throw r.error;assignments=a.data||[];reviews=r.data||[];render()}catch(e){toast("Database error: "+e.message)}}
+
+async function load() {
+    if (!session) return;
+
+    try {
+        let [a, r] = await Promise.all([
+            db.from("assignments")
+                .select("*")
+                .order("created_at", { ascending: false }),
+
+            db.from("reviews")
+                .select("*")
+        ]);
+
+        console.log("ADMIN STATUS:", isAdmin);
+        console.log("ASSIGNMENTS ERROR:", a.error);
+        console.log("ASSIGNMENTS DATA:", a.data);
+        console.log("REVIEWS ERROR:", r.error);
+        console.log("REVIEWS DATA:", r.data);
+
+        if (a.error) throw a.error;
+        if (r.error) throw r.error;
+
+        assignments = a.data || [];
+        reviews = r.data || [];
+
+        console.log("LOADED ASSIGNMENTS:", assignments.length);
+        console.log("LOADED REVIEWS:", reviews.length);
+
+        render();
+
+    } catch (e) {
+        console.error("LOAD FAILED:", e);
+        toast("Database error: " + e.message);
+    }
+}
 function go(v){document.querySelectorAll(".view").forEach(x=>x.classList.toggle("active",x.id===v));document.querySelectorAll("[data-view]").forEach(x=>x.classList.toggle("active",x.dataset.view===v));window.scrollTo({top:0,behavior:"smooth"})}
 document.querySelectorAll("[data-view]").forEach(x=>x.onclick=()=>go(x.dataset.view));document.querySelectorAll("[data-go]").forEach(x=>x.onclick=()=>go(x.dataset.go));
 $("subForm").addEventListener("submit",async e=>{e.preventDefault();let b=e.submitter;b.disabled=true;try{let r=await db.from("assignments").insert({owner_id:session.user.id,owner_name:name,title:$("title").value.trim(),subject:$("subject").value,body:$("body").value.trim()});if(r.error)throw r.error;e.target.reset();msg("subMsg","Published! Signed-in classmates can now see your assignment.");await load();toast("Assignment published.")}catch(err){msg("subMsg",err.message,true)}finally{b.disabled=false}});
